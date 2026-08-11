@@ -108,6 +108,7 @@ function render(){
    $("ability").innerHTML='<option value="">選択してください</option>'+opts.map(v=>'<option>'+v+'</option>').join('');
    $("ability").value=abilitiesSaved[id]||"";
    $("mega").checked=!!megaSaved[id];
+   updateItemLock();
    $("itemSearch").value="";
    $("itemSearch").dataset.id=id;
    $("itemSelected").textContent=itemsSaved[id]?"選択中："+itemsSaved[id]:"";
@@ -125,16 +126,32 @@ $("natureSave").addEventListener("click",function(){
    natures[id]=value;
    abilitiesSaved[id]=$("ability").value;
    megaSaved[id]=$("mega").checked;
+   if(megaSaved[id]) itemsSaved[id]="";
    $("detail").style.display="none";
    render();
    alert("性格を保存しました！");
 });
 $("detailClose").addEventListener("click",function(){$("detail").style.display="none"});
+function updateItemLock(){
+ const locked=$("mega").checked;
+ $("itemSearch").disabled=locked;
+ $("itemSearch").style.background=locked?"#e5e7eb":"#fff";
+ $("itemSearch").style.color=locked?"#9ca3af":"#111827";
+ $("itemCandidates").style.opacity=locked?"0.45":"1";
+ $("itemCandidates").style.pointerEvents=locked?"none":"auto";
+ $("itemSelected").style.color=locked?"#9ca3af":"#536174";
+ if(locked){
+   $("itemSearch").value="";
+   $("itemCandidates").innerHTML="";
+   $("itemSelected").textContent="メガ進化するため、持ち物は使用できません";
+ }
+}
 function renderItems(){
  const q=hira($("itemSearch").value.trim());
  const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
  $("itemCandidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
  $("itemCandidates").querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
+   if($("mega").checked)return;
    itemsSaved[$("itemSearch").dataset.id]=this.dataset.item;
    $("itemSelected").textContent="選択中："+this.dataset.item;
    $("itemSearch").value="";
@@ -142,6 +159,12 @@ function renderItems(){
  }));
 }
 $("itemSearch").addEventListener("input",renderItems);
+$("mega").addEventListener("change",function(){
+ if(this.checked){
+   itemsSaved[$("itemSearch").dataset.id]="";
+ }
+   updateItemLock();
+});
 render();
 })();
 </script>
