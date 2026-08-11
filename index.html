@@ -30,49 +30,41 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 <input id="search" type="text" autocomplete="off" placeholder="例：ガブ / ミミ / Garchomp">
 <div id="candidates" class="candidates"></div>
 <div id="selected" class="selected"></div>
-<div id="status" class="status"></div>
+<div id="status" class="status"></div><div id="detail" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e1e6ef">
+<h2 id="detailTitle" style="font-size:18px;margin:0 0 10px">個体登録</h2>
+<div style="padding:14px;background:#f7f9fc;border-radius:12px;font-size:14px">ここに個体登録画面を追加していきます。</div>
+<button id="detailClose" style="margin-top:10px;width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-weight:700">戻る</button>
+</div>
 </div>
 </div>
 <script>
 (function(){
 "use strict";
 const P=[
-["garchomp","ガブリアス","Garchomp"],["primarina","アシレーヌ","Primarina"],["archaludon","ブリジュラス","Archaludon"],
-["meowscarada","マスカーニャ","Meowscarada"],["mimikyu","ミミッキュ","Mimikyu"],["dragonite","カイリュー","Dragonite"],
-["gengar","ゲンガー","Gengar"],["annihilape","コノヨザル","Annihilape"],["kingambit","ドドゲザン","Kingambit"],
-["ceruledge","ソウブレイズ","Ceruledge"],["azumarill","マリルリ","Azumarill"],["greninja","ゲッコウガ","Greninja"],
-["rotom-wash","ウォッシュロトム","Rotom-Wash"],["gouging-fire","ウガツホムラ","Gouging Fire"],["iron-valiant","テツノブジン","Iron Valiant"],
-["great-tusk","イダイナキバ","Great Tusk"],["salamence","ボーマンダ","Salamence"],["volcarona","ウルガモス","Volcarona"],
-["scizor","ハッサム","Scizor"],["glimmora","キラフロル","Glimmora"]
+["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
-let mode="mine", chosen={mine:[],opp:[]};
+let mode="mine",chosen={mine:[],opp:[]};
 const $=id=>document.getElementById(id);
+function hira(v){return v.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).toLowerCase()}
 function render(){
- const q=$("search").value.trim().toLowerCase();
- const arr=chosen[mode];
- const matches=P.filter(x=>!arr.includes(x[0]) && (!q || x[1].toLowerCase().includes(q)||x[2].toLowerCase().includes(q)));
+ const q=hira($("search").value.trim()),arr=chosen[mode];
+ const matches=P.filter(x=>!arr.includes(x[0]) && (!q||[x[1],x[2],x[3]].some(v=>hira(v).includes(q))));
  $("candidates").innerHTML=matches.slice(0,10).map(x=>'<button class="candidate" data-id="'+x[0]+'">＋ '+x[1]+'<small>'+x[2]+'</small></button>').join("");
- $("candidates").querySelectorAll(".candidate").forEach(btn=>{
-   btn.addEventListener("click",function(){
-     const id=this.getAttribute("data-id");
-     if(chosen[mode].length>=6)return;
-     chosen[mode].push(id);
-     $("search").value="";
-     render();
-   });
- });
- $("selected").innerHTML=arr.length?arr.map((id,i)=>{
-   const x=P.find(v=>v[0]===id);
-   return '<div class="pill">'+x[1]+'<button data-index="'+i+'" aria-label="削除">×</button></div>';
- }).join(""):'<div class="empty">候補をタップするとここに登録されます</div>';
- $("selected").querySelectorAll("button").forEach(btn=>btn.addEventListener("click",function(){
-   chosen[mode].splice(Number(this.getAttribute("data-index")),1);render();
+ $("candidates").querySelectorAll(".candidate").forEach(btn=>btn.addEventListener("click",function(){
+   if(arr.length>=6)return; arr.push(this.dataset.id); $("search").value=""; render();
+ }));
+ $("selected").innerHTML=arr.length?arr.map((id,i)=>{const x=P.find(v=>v[0]===id);return '<button class="mon-card" data-id="'+id+'"><span class="name">'+x[1]+'</span><span class="edit">'+(mode==="mine"?"タップして個体登録 ›":"登録済み")+'</span></button>'}).join(""):'<div class="empty">候補をタップするとここに登録されます</div>';
+ $("selected").querySelectorAll(".mon-card").forEach(btn=>btn.addEventListener("click",function(){
+   if(mode!=="mine")return;
+   $("detailTitle").textContent="🧬 "+P.find(x=>x[0]===this.dataset.id)[1]+" の個体登録";
+   $("detail").style.display="block"; $("detail").scrollIntoView({behavior:"smooth",block:"center"});
  }));
  $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
 }
-$("mineTab").addEventListener("click",function(){mode="mine";this.classList.add("active");$("oppTab").classList.remove("active");render()});
-$("oppTab").addEventListener("click",function(){mode="opp";this.classList.add("active");$("mineTab").classList.remove("active");render()});
+$("mineTab").addEventListener("click",function(){mode="mine";this.classList.add("active");$("oppTab").classList.remove("active");$("detail").style.display="none";render()});
+$("oppTab").addEventListener("click",function(){mode="opp";this.classList.add("active");$("mineTab").classList.remove("active");$("detail").style.display="none";render()});
 $("search").addEventListener("input",render);
+$("detailClose").addEventListener("click",function(){$("detail").style.display="none"});
 render();
 })();
 </script>
