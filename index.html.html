@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>M-B 選出アシスタント</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;background:#f4f7fb;color:#172033}
+.wrap{max-width:680px;margin:auto;padding:18px 14px 40px}.card{background:white;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #00000010}
+h1{font-size:22px;margin:0 0 5px}.sub{font-size:13px;color:#667085;margin-bottom:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.tab{border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;background:#e8edf5}.tab.active{background:#172033;color:white}
+input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-size:16px;outline:none}input:focus{border-color:#7b8cff}
+.label{font-size:12px;color:#667085;margin:0 0 7px;font-weight:700}
+.candidates{margin-top:8px;display:grid;gap:7px}.candidate{width:100%;text-align:left;background:#fff;border:1px solid #d8dee9;border-radius:12px;padding:13px;font-size:16px;font-weight:700}
+.candidate:active{background:#eaf0ff;transform:scale(.99)}.candidate small{font-weight:400;color:#7a8494;margin-left:7px}
+.selected{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.pill{display:flex;align-items:center;gap:7px;background:#edf2ff;border-radius:999px;padding:8px 10px 8px 12px;font-size:14px;font-weight:700}.pill button{border:0;background:transparent;font-size:17px;padding:0;line-height:1}
+.status{margin-top:10px;font-size:13px;color:#667085}.empty{color:#98a2b3;font-size:13px;padding:8px 0}
+</style>
+
+<style>
+.detail{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e1e6ef}
+.detail h2{font-size:18px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.field label{display:block;font-size:12px;color:#667085;font-weight:700;margin:0 0 5px}.field input,.field select{width:100%;padding:12px;border:1px solid #d8dee9;border-radius:10px;font-size:15px;background:#fff}
+.moves{display:grid;grid-template-columns:1fr 1fr;gap:8px}.spgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.spbox{background:#f7f9fc;border:1px solid #e1e6ef;border-radius:10px;padding:8px}.spbox label{font-size:11px;color:#667085;font-weight:700}.spbox input{margin-top:4px;padding:9px}
+.sp-total{font-size:13px;font-weight:700;margin:8px 0}.actions{display:flex;gap:8px;margin-top:12px}.save{flex:1;border:0;border-radius:11px;padding:12px;background:#172033;color:#fff;font-weight:700}.close{border:1px solid #d8dee9;border-radius:11px;padding:12px 16px;background:#fff}
+.mon-card{display:flex;align-items:center;justify-content:space-between;width:100%;padding:11px 12px;border:1px solid #d8dee9;border-radius:12px;background:#fff;text-align:left}
+.mon-card .name{font-weight:700}.mon-card .edit{font-size:12px;color:#536174}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>⚔️ M-B 選出アシスタント</h1>
+<div class="sub">まずは「タップでポケモンを登録」だけを確実に動かす版</div>
+<div class="tabs">
+<button id="mineTab" class="tab active">自分の6匹</button>
+<button id="oppTab" class="tab">相手の6匹</button>
+</div>
+<div class="label">ポケモンを検索</div>
+<input id="search" type="text" autocomplete="off" placeholder="例：ガブ / ミミ / Garchomp">
+<div id="candidates" class="candidates"></div>
+<div id="selected" class="selected"></div>
+<div id="status" class="status"></div>
+<div id="detail" class="detail">
+  <h2 id="detailTitle">ポケモン詳細</h2>
+  <div class="grid">
+    <div class="field"><label>性格</label>
+      <select id="nature"><option>まじめ</option><option>いじっぱり</option><option>ようき</option><option>ひかえめ</option><option>おくびょう</option><option>ずぶとい</option><option>しんちょう</option><option>おだやか</option><option>のんき</option><option>なまいき</option><option>ゆうかん</option><option>れいせい</option><option>せっかち</option><option>むじゃき</option></select>
+    </div>
+    <div class="field"><label>特性</label><input id="ability" placeholder="特性"></div>
+    <div class="field"><label>持ち物</label><input id="item" placeholder="持ち物"></div>
+    <div class="field"><label>メガ進化</label><select id="mega"><option value="">なし</option><option value="mega">メガ進化</option></select></div>
+  </div>
+  <div class="label" style="margin-top:13px">技4つ</div>
+  <div class="moves">
+    <div class="field"><input id="move1" placeholder="技1"></div><div class="field"><input id="move2" placeholder="技2"></div>
+    <div class="field"><input id="move3" placeholder="技3"></div><div class="field"><input id="move4" placeholder="技4"></div>
+  </div>
+  <div class="label" style="margin-top:13px">能力ポイント（SP）</div>
+  <div class="spgrid">
+    <div class="spbox"><label>HP</label><input id="spHP" type="number" min="0" max="32" value="0"></div>
+    <div class="spbox"><label>攻撃</label><input id="spAtk" type="number" min="0" max="32" value="0"></div>
+    <div class="spbox"><label>防御</label><input id="spDef" type="number" min="0" max="32" value="0"></div>
+    <div class="spbox"><label>特攻</label><input id="spSpA" type="number" min="0" max="32" value="0"></div>
+    <div class="spbox"><label>特防</label><input id="spSpD" type="number" min="0" max="32" value="0"></div>
+    <div class="spbox"><label>素早さ</label><input id="spSpe" type="number" min="0" max="32" value="0"></div>
+  </div>
+  <div id="spTotal" class="sp-total">SP合計：0 / 66</div>
+  <div class="actions"><button id="saveDetail" class="save">この個体を保存</button><button id="closeDetail" class="close">閉じる</button></div>
+</div>
+
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const P=[
+["garchomp","ガブリアス","Garchomp"],["primarina","アシレーヌ","Primarina"],["archaludon","ブリジュラス","Archaludon"],
+["meowscarada","マスカーニャ","Meowscarada"],["mimikyu","ミミッキュ","Mimikyu"],["dragonite","カイリュー","Dragonite"],
+["gengar","ゲンガー","Gengar"],["annihilape","コノヨザル","Annihilape"],["kingambit","ドドゲザン","Kingambit"],
+["ceruledge","ソウブレイズ","Ceruledge"],["azumarill","マリルリ","Azumarill"],["greninja","ゲッコウガ","Greninja"],
+["rotom-wash","ウォッシュロトム","Rotom-Wash"],["gouging-fire","ウガツホムラ","Gouging Fire"],["iron-valiant","テツノブジン","Iron Valiant"],
+["great-tusk","イダイナキバ","Great Tusk"],["salamence","ボーマンダ","Salamence"],["volcarona","ウルガモス","Volcarona"],
+["scizor","ハッサム","Scizor"],["glimmora","キラフロル","Glimmora"]
+];
+let mode="mine", chosen={mine:[],opp:[]}, sets=JSON.parse(localStorage.getItem("mb_sets_v4")||"{}"), editing=null;
+const $=id=>document.getElementById(id);
+function mon(id){return P.find(x=>x[0]===id)}
+function render(){
+ const q=$("search").value.trim().toLowerCase(), arr=chosen[mode];
+ const matches=P.filter(x=>!arr.includes(x[0]) && (!q||x[1].toLowerCase().includes(q)||x[2].toLowerCase().includes(q)));
+ $("candidates").innerHTML=matches.slice(0,10).map(x=>'<button class="candidate" data-id="'+x[0]+'">＋ '+x[1]+'<small>'+x[2]+'</small></button>').join("");
+ $("candidates").querySelectorAll(".candidate").forEach(btn=>btn.addEventListener("click",()=>{if(arr.length<6){arr.push(btn.dataset.id);$("search").value="";render()}}));
+ $("selected").innerHTML=arr.length?arr.map((id,i)=>{const x=mon(id),has=!!sets[id];return '<button class="mon-card" data-edit="'+id+'"><span class="name">'+x[1]+(has?' ✓':'')+'</span><span class="edit">タップして個体登録 ›</span></button>'}).join(""):'<div class="empty">候補をタップするとここに登録されます</div>';
+ $("selected").querySelectorAll("[data-edit]").forEach(btn=>btn.addEventListener("click",()=>openDetail(btn.dataset.edit)));
+ $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
+}
+function openDetail(id){
+ if(mode!=="mine"){return}
+ editing=id; const d=sets[id]||{}, x=mon(id);
+ $("detailTitle").textContent="🧬 "+x[1]+" の個体登録";
+ $("nature").value=d.nature||"まじめ"; $("ability").value=d.ability||""; $("item").value=d.item||""; $("mega").value=d.mega||"";
+ ["move1","move2","move3","move4"].forEach(k=>$(k).value=d[k]||"");
+ const sp=d.sp||{}; [["spHP","HP"],["spAtk","Atk"],["spDef","Def"],["spSpA","SpA"],["spSpD","SpD"],["spSpe","Spe"]].forEach(([id,k])=>$(id).value=sp[k]||0);
+ $("detail").style.display="block"; updateSP(); $("detail").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function updateSP(){
+ const ids=["spHP","spAtk","spDef","spSpA","spSpD","spSpe"]; let sum=0;
+ ids.forEach(id=>{let v=Math.max(0,Math.min(32,Number($(id).value)||0));$(id).value=v;sum+=v});
+ $("spTotal").textContent="SP合計："+sum+" / 66"+(sum>66?" ⚠️":"");
+}
+["spHP","spAtk","spDef","spSpA","spSpD","spSpe"].forEach(id=>$(id).addEventListener("input",updateSP));
+$("saveDetail").addEventListener("click",()=>{
+ if(!editing)return; let sp={HP:+$("spHP").value||0,Atk:+$("spAtk").value||0,Def:+$("spDef").value||0,SpA:+$("spSpA").value||0,SpD:+$("spSpD").value||0,Spe:+$("spSpe").value||0};
+ if(Object.values(sp).reduce((a,b)=>a+b,0)>66){alert("SP合計は66までです");return}
+ sets[editing]={nature:$("nature").value,ability:$("ability").value,item:$("item").value,mega:$("mega").value,move1:$("move1").value,move2:$("move2").value,move3:$("move3").value,move4:$("move4").value,sp};
+ localStorage.setItem("mb_sets_v4",JSON.stringify(sets)); $("detail").style.display="none"; render(); alert("個体データを保存しました！");
+});
+$("closeDetail").addEventListener("click",()=>{$("detail").style.display="none";editing=null});
+$("mineTab").addEventListener("click",function(){mode="mine";this.classList.add("active");$("oppTab").classList.remove("active");render()});
+$("oppTab").addEventListener("click",function(){mode="opp";this.classList.add("active");$("mineTab").classList.remove("active");$("detail").style.display="none";render()});
+$("search").addEventListener("input",render);
+render();
+})();
+</script>
+
+</body>
+</html>
