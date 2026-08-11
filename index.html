@@ -31,8 +31,29 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 <div id="candidates" class="candidates"></div>
 <div id="selected" class="selected"></div>
 <div id="status" class="status"></div><div id="detail" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e1e6ef">
-<h2 id="detailTitle" style="font-size:18px;margin:0 0 10px">個体登録</h2>
-<div style="padding:14px;background:#f7f9fc;border-radius:12px;font-size:14px">ここに個体登録画面を追加していきます。</div>
+<h2 id="detailTitle" style="font-size:18px;margin:0 0 12px">個体登録</h2>
+<div style="font-size:13px;font-weight:700;margin-bottom:6px">性格</div>
+<select id="nature" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-size:16px">
+<option value="">選択してください</option>
+<option>いじっぱり</option>
+<option>ようき</option>
+<option>ひかえめ</option>
+<option>おくびょう</option>
+<option>ずぶとい</option>
+<option>わんぱく</option>
+<option>のうてんき</option>
+<option>うっかりや</option>
+<option>おだやか</option>
+<option>しんちょう</option>
+<option>なまいき</option>
+<option>せっかち</option>
+<option>むじゃき</option>
+<option>ゆうかん</option>
+<option>のんき</option>
+<option>れいせい</option>
+<option>まじめ</option>
+</select>
+<button id="natureSave" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:11px;background:#172033;color:#fff;font-weight:700">性格を保存</button>
 <button id="detailClose" style="margin-top:10px;width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-weight:700">戻る</button>
 </div>
 </div>
@@ -43,7 +64,7 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 const P=[
 ["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
-let mode="mine",chosen={mine:[],opp:[]};
+let mode="mine",chosen={mine:[],opp:[]},natures={};
 const $=id=>document.getElementById(id);
 function hira(v){return v.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).toLowerCase()}
 function render(){
@@ -53,10 +74,13 @@ function render(){
  $("candidates").querySelectorAll(".candidate").forEach(btn=>btn.addEventListener("click",function(){
    if(arr.length>=6)return; arr.push(this.dataset.id); $("search").value=""; render();
  }));
- $("selected").innerHTML=arr.length?arr.map((id,i)=>{const x=P.find(v=>v[0]===id);return '<button class="mon-card" data-id="'+id+'"><span class="name">'+x[1]+'</span><span class="edit">'+(mode==="mine"?"タップして個体登録 ›":"登録済み")+'</span></button>'}).join(""):'<div class="empty">候補をタップするとここに登録されます</div>';
+ $("selected").innerHTML=arr.length?arr.map((id,i)=>{const x=P.find(v=>v[0]===id);return '<button class="mon-card" data-id="'+id+'"><span class="name">'+x[1]+(natures[id]?" ✓":"")+'</span><span class="edit">'+(mode==="mine"?"タップして個体登録 ›":"登録済み")+'</span></button>'}).join(""):'<div class="empty">候補をタップするとここに登録されます</div>';
  $("selected").querySelectorAll(".mon-card").forEach(btn=>btn.addEventListener("click",function(){
    if(mode!=="mine")return;
-   $("detailTitle").textContent="🧬 "+P.find(x=>x[0]===this.dataset.id)[1]+" の個体登録";
+   const id=this.dataset.id;
+   $("detailTitle").textContent="🧬 "+P.find(x=>x[0]===id)[1]+" の個体登録";
+   $("nature").value=natures[id]||"";
+   $("nature").dataset.id=id;
    $("detail").style.display="block"; $("detail").scrollIntoView({behavior:"smooth",block:"center"});
  }));
  $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
@@ -64,6 +88,14 @@ function render(){
 $("mineTab").addEventListener("click",function(){mode="mine";this.classList.add("active");$("oppTab").classList.remove("active");$("detail").style.display="none";render()});
 $("oppTab").addEventListener("click",function(){mode="opp";this.classList.add("active");$("mineTab").classList.remove("active");$("detail").style.display="none";render()});
 $("search").addEventListener("input",render);
+$("natureSave").addEventListener("click",function(){
+   const id=$("nature").dataset.id, value=$("nature").value;
+   if(!id || !value){alert("性格を選択してください");return}
+   natures[id]=value;
+   $("detail").style.display="none";
+   render();
+   alert("性格を保存しました！");
+});
 $("detailClose").addEventListener("click",function(){$("detail").style.display="none"});
 render();
 })();
