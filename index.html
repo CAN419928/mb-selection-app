@@ -82,28 +82,13 @@ const P=[
 ["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
 let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={},megaSaved={},itemsSaved={},movesSaved={};
-const MOVESET={
-garchomp:[["じしん","Earthquake"],["げきりん","Outrage"],["ドラゴンクロー","Dragon Claw"],["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"],["まもる","Protect"]],
-primarina:[["ハイドロポンプ","Hydro Pump"],["ムーンフォース","Moonblast"],["れいとうビーム","Ice Beam"],["まもる","Protect"]],
-archaludon:[["りゅうせいぐん","Draco Meteor"],["ラスターカノン","Flash Cannon"],["10まんボルト","Thunderbolt"],["まもる","Protect"]],
-meowscarada:[["トリックフラワー","Flower Trick"],["ふいうち","Sucker Punch"],["とんぼがえり","U-turn"],["つるぎのまい","Swords Dance"]],
-mimikyu:[["じゃれつく","Play Rough"],["かげうち","Shadow Sneak"],["つるぎのまい","Swords Dance"],["まもる","Protect"]],
-dragonite:[["しんそく","Extreme Speed"],["げきりん","Outrage"],["じしん","Earthquake"],["りゅうのまい","Dragon Dance"]],
-gengar:[["シャドーボール","Shadow Ball"],["ヘドロばくだん","Sludge Bomb"],["10まんボルト","Thunderbolt"],["おにび","Will-O-Wisp"]],
-annihilape:[["ふんどのこぶし","Rage Fist"],["ドレインパンチ","Drain Punch"],["とんぼがえり","U-turn"],["まもる","Protect"]],
-kingambit:[["ドゲザン","Kowtow Cleave"],["ふいうち","Sucker Punch"],["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"]],
-ceruledge:[["むねんのつるぎ","Bitter Blade"],["シャドークロー","Shadow Claw"],["つるぎのまい","Swords Dance"],["おにび","Will-O-Wisp"]],
-azumarill:[["アクアブレイク","Liquidation"],["じゃれつく","Play Rough"],["アクアジェット","Aqua Jet"],["はらだいこ","Belly Drum"]],
-greninja:[["ねっとう","Scald"],["れいとうビーム","Ice Beam"],["あくのはどう","Dark Pulse"],["とんぼがえり","U-turn"]],
-"rotom-wash":[["ハイドロポンプ","Hydro Pump"],["10まんボルト","Thunderbolt"],["ボルトチェンジ","Volt Switch"],["おにび","Will-O-Wisp"]],
-"gouging-fire":[["フレアドライブ","Flare Blitz"],["ドラゴンクロー","Dragon Claw"],["かえんほうしゃ","Flamethrower"],["りゅうのまい","Dragon Dance"]],
-"iron-valiant":[["ムーンフォース","Moonblast"],["インファイト","Close Combat"],["サイコカッター","Psycho Cut"],["まもる","Protect"]],
-"great-tusk":[["じしん","Earthquake"],["ぶちかまし","Headlong Rush"],["インファイト","Close Combat"],["ステルスロック","Stealth Rock"]],
-salamence:[["りゅうせいぐん","Draco Meteor"],["げきりん","Outrage"],["じしん","Earthquake"],["りゅうのまい","Dragon Dance"]],
-volcarona:[["ねっぷう","Heat Wave"],["むしのさざめき","Bug Buzz"],["ちょうのまい","Quiver Dance"],["おにび","Will-O-Wisp"]],
-scizor:[["バレットパンチ","Bullet Punch"],["とんぼがえり","U-turn"],["つるぎのまい","Swords Dance"],["はねやすめ","Roost"]],
-glimmora:[["パワージェム","Power Gem"],["ヘドロウェーブ","Sludge Wave"],["ステルスロック","Stealth Rock"],["だいちのちから","Earth Power"]]
-};
+const MOVES=[
+["じしん","Earthquake"],["げきりん","Outrage"],["ドラゴンクロー","Dragon Claw"],
+["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"],["まもる","Protect"],
+["ハイドロポンプ","Hydro Pump"],["ムーンフォース","Moonblast"],["フレアドライブ","Flare Blitz"],
+["シャドーボール","Shadow Ball"],["ふいうち","Sucker Punch"],["とんぼがえり","U-turn"],
+["れいとうビーム","Ice Beam"],["10まんボルト","Thunderbolt"],["おにび","Will-O-Wisp"]
+];
 const ITEMS=["きあいのタスキ","こだわりハチマキ","こだわりメガネ","こだわりスカーフ","いのちのたま","たべのこし","オボンのみ","ラムのみ","ゴツゴツメット","とつげきチョッキ","きあいのハチマキ","じゃくてんほけん","ふうせん","だっしゅつボタン","だっしゅつパック","しんかのきせき","くろいヘドロ","ひかりのねんど","あつぞこブーツ","パンチグローブ","ものまねハーブ","おんみつマント","からぶりほけん","クリアチャーム","メンタルハーブ","パワフルハーブ","ぼうじんゴーグル","するどいツメ","ピントレンズ","たつじんのおび"];
 const AB={
 garchomp:["すながくれ","さめはだ"],primarina:["げきりゅう"],archaludon:["じきゅうりょく","すじがねいり"],
@@ -177,10 +162,8 @@ function updateItemLock(){
  }
 }
 function renderMoves(){
- const id=$("move1Search").dataset.id;
- const list=MOVESET[id]||[];
  const q=hira($("move1Search").value.trim());
- const found=list.filter(v=>!q || hira(v[0]).includes(q) || hira(v[1]).includes(q)).slice(0,8);
+ const found=MOVES.filter(v=>!q || hira(v[0]).includes(q) || hira(v[1]).includes(q)).slice(0,8);
  $("move1Candidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'<small>'+v[1]+'</small></button>').join("");
  $("move1Candidates").querySelectorAll("[data-move]").forEach(btn=>btn.addEventListener("click",function(){
    movesSaved[$("move1Search").dataset.id]=this.dataset.move;
@@ -189,6 +172,19 @@ function renderMoves(){
    renderMoves();
  }));
 }
+function renderItems(){
+ const q=hira($("itemSearch").value.trim());
+ const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
+ $("itemCandidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
+ $("itemCandidates").querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
+   if($("mega").checked)return;
+   itemsSaved[$("itemSearch").dataset.id]=this.dataset.item;
+   $("itemSelected").textContent="選択中："+this.dataset.item;
+   $("itemSearch").value="";
+   renderItems();
+ }));
+}
+$("itemSearch").addEventListener("input",renderItems);
 $("move1Search").addEventListener("input",renderMoves);
 $("mega").addEventListener("change",function(){
  if(this.checked){
