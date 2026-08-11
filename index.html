@@ -116,7 +116,7 @@ function render(){
    $("itemSelected").textContent=itemsSaved[id]?"選択中："+itemsSaved[id]:"";
    window.currentPokemonId=id;
    renderItems();
-   renderMoves();
+   renderGarchompMoves();
    $("detail").style.display="block"; $("detail").scrollIntoView({behavior:"smooth",block:"center"});
  }));
  $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
@@ -150,16 +150,17 @@ function updateItemLock(){
    $("itemSelected").textContent="メガ進化するため、持ち物は使用できません";
  }
 }
-function renderMoves(){
+function renderGarchompMoves(){
  const id=window.currentPokemonId;
+ const list=MOVESETS[id]||[];
  const area=$("movesArea"); if(!area)return;
  area.innerHTML="";
  for(let slot=1;slot<=4;slot++){
   const box=document.createElement("div"); box.style.marginTop=slot===1?"0":"12px";
   box.innerHTML='<div style="font-size:13px;font-weight:700;margin-bottom:6px">技'+slot+'</div>'+
-  '<input id="move'+slot+'Search" type="text" placeholder="技を検索…" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px">'+
-  '<div id="move'+slot+'Candidates" style="display:grid;gap:6px;margin-top:7px"></div>'+
-  '<div id="move'+slot+'Selected" style="font-size:13px;margin-top:7px;color:#536174"></div>';
+   '<input id="move'+slot+'Search" type="text" placeholder="技を検索…" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px">'+
+   '<div id="move'+slot+'Candidates" style="display:grid;gap:6px;margin-top:7px"></div>'+
+   '<div id="move'+slot+'Selected" style="font-size:13px;margin-top:7px;color:#536174"></div>';
   area.appendChild(box);
   const input=box.querySelector("input"); input.dataset.id=id;
   input.addEventListener("input",()=>renderMoveSlot(slot));
@@ -169,17 +170,29 @@ function renderMoves(){
 function renderMoveSlot(slot){
  const input=$("move"+slot+"Search"); if(!input)return;
  const id=input.dataset.id, list=MOVESETS[id]||[], q=hira(input.value.trim());
- const selected=movesSaved[id]&&movesSaved[id][slot-1]||"";
+ const saved=(movesSaved[id]&&Array.isArray(movesSaved[id]))?movesSaved[id]:[];
  const found=list.filter(v=>!q||hira(v[0]).includes(q)||hira(v[1]).includes(q));
- const candidates=$("move"+slot+"Candidates");
- candidates.innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'</button>').join("");
- candidates.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",function(){
-  if(!movesSaved[id])movesSaved[id]=[];
-  movesSaved[id][slot-1]=this.dataset.move;
-  input.value=""; renderMoveSlot(slot);
+ const c=$("move"+slot+"Candidates");
+ c.innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'</button>').join("");
+ c.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",function(){
+  if(!movesSaved[id]||!Array.isArray(movesSaved[id]))movesSaved[id]=[];
+  movesSaved[id][slot-1]=this.dataset.move; input.value=""; renderMoveSlot(slot);
  }));
- $("move"+slot+"Selected").textContent=selected?"選択中："+selected:"";
+ $("move"+slot+"Selected").textContent=saved[slot-1]?"選択中："+saved[slot-1]:"";
 }
+function renderItems(){
+ const q=hira($("itemSearch").value.trim());
+ const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
+ $("itemCandidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
+ $("itemCandidates").querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
+   if($("mega").checked)return;
+   itemsSaved[$("itemSearch").dataset.id]=this.dataset.item;
+   $("itemSelected").textContent="選択中："+this.dataset.item;
+   $("itemSearch").value="";
+   renderItems();
+ }));
+}
+$("itemSearch").addEventListener("input",renderItems);
 
 $("mega").addEventListener("change",function(){
  if(this.checked){
