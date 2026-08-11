@@ -83,11 +83,11 @@ const P=[
 ];
 let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={},megaSaved={},itemsSaved={},movesSaved={};
 const MOVES=[
-["じしん","Earthquake","じしん"],["げきりん","Outrage","げきりん"],["ドラゴンクロー","Dragon Claw","どらごんくろー"],
-["アイアンヘッド","Iron Head","あいあんへっど"],["つるぎのまい","Swords Dance","つるぎのまい"],["まもる","Protect","まもる"],
-["ハイドロポンプ","Hydro Pump","はいどろぽんぷ"],["ムーンフォース","Moonblast","むーんふぉーす"],["フレアドライブ","Flare Blitz","ふれあどらいぶ"],
-["シャドーボール","Shadow Ball","しゃどーぼーる"],["ふいうち","Sucker Punch","ふいうち"],["とんぼがえり","U-turn","とんぼがえり"],
-["れいとうビーム","Ice Beam","れいとうびーむ"],["10まんボルト","Thunderbolt","10まんぼると"],["おにび","Will-O-Wisp","おにび"]
+["じしん","Earthquake"],["げきりん","Outrage"],["ドラゴンクロー","Dragon Claw"],
+["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"],["まもる","Protect"],
+["ハイドロポンプ","Hydro Pump"],["ムーンフォース","Moonblast"],["フレアドライブ","Flare Blitz"],
+["シャドーボール","Shadow Ball"],["ふいうち","Sucker Punch"],["とんぼがえり","U-turn"],
+["れいとうビーム","Ice Beam"],["10まんボルト","Thunderbolt"],["おにび","Will-O-Wisp"]
 ];
 const ITEMS=["きあいのタスキ","こだわりハチマキ","こだわりメガネ","こだわりスカーフ","いのちのたま","たべのこし","オボンのみ","ラムのみ","ゴツゴツメット","とつげきチョッキ","きあいのハチマキ","じゃくてんほけん","ふうせん","だっしゅつボタン","だっしゅつパック","しんかのきせき","くろいヘドロ","ひかりのねんど","あつぞこブーツ","パンチグローブ","ものまねハーブ","おんみつマント","からぶりほけん","クリアチャーム","メンタルハーブ","パワフルハーブ","ぼうじんゴーグル","するどいツメ","ピントレンズ","たつじんのおび"];
 const AB={
@@ -147,18 +147,6 @@ $("natureSave").addEventListener("click",function(){
    alert("性格を保存しました！");
 });
 $("detailClose").addEventListener("click",function(){$("detail").style.display="none"});
-function renderMoves(){
- const q=hira($("move1Search").value.trim());
- const found=MOVES.filter(v=>!q||v.some(x=>hira(x).includes(q))).slice(0,8);
- $("move1Candidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'<small>'+v[1]+'</small></button>').join("");
- $("move1Candidates").querySelectorAll("[data-move]").forEach(btn=>btn.addEventListener("click",function(){
-   movesSaved[$("move1Search").dataset.id]=this.dataset.move;
-   $("move1Selected").textContent="選択中："+this.dataset.move;
-   $("move1Search").value="";
-   renderMoves();
- }));
-}
-$("move1Search").addEventListener("input",renderMoves);
 function updateItemLock(){
  const locked=$("mega").checked;
  $("itemSearch").disabled=locked;
@@ -173,6 +161,17 @@ function updateItemLock(){
    $("itemSelected").textContent="メガ進化するため、持ち物は使用できません";
  }
 }
+function renderMoves(){
+ const q=hira($("move1Search").value.trim());
+ const found=MOVES.filter(v=>!q || hira(v[0]).includes(q) || hira(v[1]).includes(q)).slice(0,8);
+ $("move1Candidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'<small>'+v[1]+'</small></button>').join("");
+ $("move1Candidates").querySelectorAll("[data-move]").forEach(btn=>btn.addEventListener("click",function(){
+   movesSaved[$("move1Search").dataset.id]=this.dataset.move;
+   $("move1Selected").textContent="選択中："+this.dataset.move;
+   $("move1Search").value="";
+   renderMoves();
+ }));
+}
 function renderItems(){
  const q=hira($("itemSearch").value.trim());
  const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
@@ -186,6 +185,7 @@ function renderItems(){
  }));
 }
 $("itemSearch").addEventListener("input",renderItems);
+$("move1Search").addEventListener("input",renderMoves);
 $("mega").addEventListener("change",function(){
  if(this.checked){
    itemsSaved[$("itemSearch").dataset.id]="";
