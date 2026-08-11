@@ -82,10 +82,10 @@ const P=[
 ["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
 let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={},megaSaved={},itemsSaved={},movesSaved={};
-const GARCHOMP_MOVES=[
-["じしん","Earthquake"],["げきりん","Outrage"],["ドラゴンクロー","Dragon Claw"],
-["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"],["まもる","Protect"]
-];
+const MOVESETS={
+garchomp:[["じしん","Earthquake"],["げきりん","Outrage"],["ドラゴンクロー","Dragon Claw"],["アイアンヘッド","Iron Head"],["つるぎのまい","Swords Dance"],["まもる","Protect"]],
+primarina:[["ハイドロポンプ","Hydro Pump"],["ムーンフォース","Moonblast"],["れいとうビーム","Ice Beam"],["まもる","Protect"]]
+};
 const ITEMS=["きあいのタスキ","こだわりハチマキ","こだわりメガネ","こだわりスカーフ","いのちのたま","たべのこし","オボンのみ","ラムのみ","ゴツゴツメット","とつげきチョッキ","きあいのハチマキ","じゃくてんほけん","ふうせん","だっしゅつボタン","だっしゅつパック","しんかのきせき","くろいヘドロ","ひかりのねんど","あつぞこブーツ","パンチグローブ","ものまねハーブ","おんみつマント","からぶりほけん","クリアチャーム","メンタルハーブ","パワフルハーブ","ぼうじんゴーグル","するどいツメ","ピントレンズ","たつじんのおび"];
 const AB={
 garchomp:["すながくれ","さめはだ"],primarina:["げきりゅう"],archaludon:["じきゅうりょく","すじがねいり"],
@@ -160,7 +160,7 @@ function updateItemLock(){
 }
 function renderGarchompMoves(){
  const id=$("move1Search").dataset.id;
- const list=id==="garchomp"?GARCHOMP_MOVES:[];
+ const list=MOVESETS[id]||[];
  const q=hira($("move1Search").value.trim());
  const found=list.filter(v=>!q||hira(v[0]).includes(q)||hira(v[1]).includes(q));
  $("move1Candidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'</button>').join("");
