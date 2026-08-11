@@ -57,6 +57,11 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 <select id="ability" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-size:16px">
 <option value="">選択してください</option>
 </select>
+<div style="font-size:13px;font-weight:700;margin:14px 0 6px">メガ進化</div>
+<label style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#f7f9fc;border-radius:11px;border:1px solid #d8dee9">
+<span>このポケモンはメガ進化する</span>
+<input id="mega" type="checkbox" style="width:22px;height:22px">
+</label>
 <button id="natureSave" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:11px;background:#172033;color:#fff;font-weight:700">保存</button>
 <button id="detailClose" style="margin-top:10px;width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-weight:700">戻る</button>
 </div>
@@ -68,7 +73,7 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 const P=[
 ["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
-let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={};
+let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={},megaSaved={};
 const AB={
 garchomp:["すながくれ","さめはだ"],primarina:["げきりゅう"],archaludon:["じきゅうりょく","すじがねいり"],
 meowscarada:["しんりょく","へんげんじざい"],mimikyu:["ばけのかわ"],dragonite:["せいしんりょく","マルチスケイル"],
@@ -96,7 +101,8 @@ function render(){
    $("nature").dataset.id=id;
    const opts=AB[id]||[];
    $("ability").innerHTML='<option value="">選択してください</option>'+opts.map(v=>'<option>'+v+'</option>').join('');
-   $("ability").value=(window.abilitiesSaved||{})[id]||"";
+   $("ability").value=abilitiesSaved[id]||"";
+   $("mega").checked=!!megaSaved[id];
    $("detail").style.display="block"; $("detail").scrollIntoView({behavior:"smooth",block:"center"});
  }));
  $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
@@ -109,6 +115,7 @@ $("natureSave").addEventListener("click",function(){
    if(!id || !value){alert("性格を選択してください");return}
    natures[id]=value;
    abilitiesSaved[id]=$("ability").value;
+   megaSaved[id]=$("mega").checked;
    $("detail").style.display="none";
    render();
    alert("性格を保存しました！");
