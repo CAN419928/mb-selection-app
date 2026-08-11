@@ -53,7 +53,11 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 <option>れいせい</option>
 <option>まじめ</option>
 </select>
-<button id="natureSave" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:11px;background:#172033;color:#fff;font-weight:700">性格を保存</button>
+<div style="font-size:13px;font-weight:700;margin:14px 0 6px">特性</div>
+<select id="ability" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-size:16px">
+<option value="">選択してください</option>
+</select>
+<button id="natureSave" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:11px;background:#172033;color:#fff;font-weight:700">保存</button>
 <button id="detailClose" style="margin-top:10px;width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-weight:700">戻る</button>
 </div>
 </div>
@@ -64,7 +68,16 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 const P=[
 ["garchomp","ガブリアス","Garchomp","がぶりあす"],["primarina","アシレーヌ","Primarina","あしれーぬ"],["archaludon","ブリジュラス","Archaludon","ぶりじゅらす"],["meowscarada","マスカーニャ","Meowscarada","ますかーにゃ"],["mimikyu","ミミッキュ","Mimikyu","みみっきゅ"],["dragonite","カイリュー","Dragonite","かいりゅー"],["gengar","ゲンガー","Gengar","げんがー"],["annihilape","コノヨザル","Annihilape","このよざる"],["kingambit","ドドゲザン","Kingambit","どどげざん"],["ceruledge","ソウブレイズ","Ceruledge","そうぶれいず"],["azumarill","マリルリ","Azumarill","まりるり"],["greninja","ゲッコウガ","Greninja","げっこうが"],["rotom-wash","ウォッシュロトム","Rotom-Wash","うぉっしゅろとむ"],["gouging-fire","ウガツホムラ","Gouging Fire","うがつほむら"],["iron-valiant","テツノブジン","Iron Valiant","てつのぶじん"],["great-tusk","イダイナキバ","Great Tusk","いだいなきば"],["salamence","ボーマンダ","Salamence","ぼーまんだ"],["volcarona","ウルガモス","Volcarona","うるがもす"],["scizor","ハッサム","Scizor","はっさむ"],["glimmora","キラフロル","Glimmora","きらふろる"]
 ];
-let mode="mine",chosen={mine:[],opp:[]},natures={};
+let mode="mine",chosen={mine:[],opp:[]},natures={},abilitiesSaved={};
+const AB={
+garchomp:["すながくれ","さめはだ"],primarina:["げきりゅう"],archaludon:["じきゅうりょく","すじがねいり"],
+meowscarada:["しんりょく","へんげんじざい"],mimikyu:["ばけのかわ"],dragonite:["せいしんりょく","マルチスケイル"],
+gengar:["のろわれボディ"],annihilape:["やるき","せいしんりょく","まけんき"],kingambit:["まけんき","そうだいしょう"],
+ceruledge:["もらいび","くだけるよろい"],azumarill:["あついしぼう","ちからもち","そうしょく"],greninja:["げきりゅう","へんげんじざい"],
+"rotom-wash":["ふゆう"],"gouging-fire":["こだいかっせい"],"iron-valiant":["クォークチャージ"],
+"great-tusk":["ようりょくそ","こだいかっせい"],salamence:["いかく","じしんかじょう","じょうききかん"],
+volcarona:["ほのおのからだ","むしのしらせ"],scizor:["テクニシャン","むしのしらせ","ライトメタル"],glimmora:["どくげしょう","ふしょく"]
+};
 const $=id=>document.getElementById(id);
 function hira(v){return v.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).toLowerCase()}
 function render(){
@@ -81,6 +94,9 @@ function render(){
    $("detailTitle").textContent="🧬 "+P.find(x=>x[0]===id)[1]+" の個体登録";
    $("nature").value=natures[id]||"";
    $("nature").dataset.id=id;
+   const opts=AB[id]||[];
+   $("ability").innerHTML='<option value="">選択してください</option>'+opts.map(v=>'<option>'+v+'</option>').join('');
+   $("ability").value=(window.abilitiesSaved||{})[id]||"";
    $("detail").style.display="block"; $("detail").scrollIntoView({behavior:"smooth",block:"center"});
  }));
  $("status").textContent=(mode==="mine"?"自分":"相手")+"： "+arr.length+" / 6 匹";
@@ -92,6 +108,7 @@ $("natureSave").addEventListener("click",function(){
    const id=$("nature").dataset.id, value=$("nature").value;
    if(!id || !value){alert("性格を選択してください");return}
    natures[id]=value;
+   abilitiesSaved[id]=$("ability").value;
    $("detail").style.display="none";
    render();
    alert("性格を保存しました！");
