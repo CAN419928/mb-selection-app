@@ -23,11 +23,19 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 .move-slot .move-label{font-size:13px;font-weight:700;margin-bottom:6px}
 .move-slot .move-search{width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px;box-sizing:border-box}
 .move-slot .move-candidates{display:none;gap:6px;margin-top:7px}
-.move-slot:focus-within .move-candidates{display:grid}
+.move-slot .move-search:focus + .move-candidates{display:grid}
 .move-slot .move-selected{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:10px 12px;border:2px solid #4b8cff;border-radius:10px;background:#eef5ff;color:#174ea6;font-weight:700}
 .move-slot .move-selected.empty{border:1px dashed #c8d0dc;background:#f8fafc;color:#7a8797;font-weight:400}
 .move-slot .move-change{border:0;background:transparent;color:#174ea6;font-size:12px;font-weight:700;padding:2px 4px}
 .move-slot .candidate{padding:9px 10px;border:1px solid #d8dee9;border-radius:9px;background:#fff;text-align:left}
+</style>
+
+<style id="item-ui-enhancement">
+.item-search-wrap .item-candidates{display:none;gap:6px;margin-top:7px}
+.item-search-wrap .item-search:focus + .item-candidates{display:grid}
+.item-search-wrap .item-selected{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:10px 12px;border:2px solid #4b8cff;border-radius:10px;background:#eef5ff;color:#174ea6;font-weight:700}
+.item-search-wrap .item-selected.empty{border:1px dashed #c8d0dc;background:#f8fafc;color:#7a8797;font-weight:400}
+.item-search-wrap .item-change{border:0;background:transparent;color:#174ea6;font-size:12px;font-weight:700;padding:2px 4px}
 </style>
 </head>
 <body>
@@ -76,9 +84,9 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 <input id="mega" type="checkbox" style="width:22px;height:22px">
 </label>
 <div style="font-size:13px;font-weight:700;margin:14px 0 6px">持ち物</div>
-<input id="itemSearch" type="text" placeholder="持ち物を検索…" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px">
+<div class="item-search-wrap"><input id="itemSearch" type="text" placeholder="持ち物を検索…" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px">
 <div id="itemCandidates" style="display:grid;gap:6px;margin-top:7px"></div>
-<div id="itemSelected" style="font-size:13px;margin-top:7px;color:#536174"></div>
+<div id="itemSelected" style="font-size:13px;margin-top:7px;color:#536174"></div></div>
 <div id="movesArea"></div>
 <button id="natureSave" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:11px;background:#172033;color:#fff;font-weight:700">保存</button>
 <button id="detailClose" style="margin-top:10px;width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;background:#fff;font-weight:700">戻る</button>
@@ -210,17 +218,31 @@ function renderMoveSlot(slot){
 }
 
 function renderItems(){
- const q=hira($("itemSearch").value.trim());
+ const input=$("itemSearch");
+ if(!input)return;
+ const id=input.dataset.id;
+ const q=hira(input.value.trim());
+ const selected=itemsSaved[id]||"";
  const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
- $("itemCandidates").innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
- $("itemCandidates").querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
+ const candidates=$("itemCandidates");
+ candidates.innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
+ candidates.querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
    if($("mega").checked)return;
-   itemsSaved[$("itemSearch").dataset.id]=this.dataset.item;
-   $("itemSelected").textContent="選択中："+this.dataset.item;
-   $("itemSearch").value="";
+   itemsSaved[id]=this.dataset.item;
+   input.value="";
+   input.blur();
    renderItems();
  }));
+ const selectedEl=$("itemSelected");
+ if(selectedEl){
+   selectedEl.className=selected?"item-selected":"item-selected empty";
+   selectedEl.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="item-change">変更</button>':'未選択';
+   if(selected)selectedEl.querySelector(".item-change").addEventListener("click",function(){
+     input.focus();
+   });
+ }
 }
+
 $("itemSearch").addEventListener("input",renderItems);
 
 $("mega").addEventListener("change",function(){
