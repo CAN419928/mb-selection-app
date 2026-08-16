@@ -172,74 +172,71 @@ function updateItemLock(){
  }
 }
 function renderGarchompMoves(){
- const id=window.currentPokemonId;
- const list=MOVESETS[id]||[];
- const area=$("movesArea"); if(!area)return;
+ const id=window.currentPokemonId, area=$("movesArea");
+ if(!area)return;
  area.innerHTML="";
  for(let slot=1;slot<=4;slot++){
   const box=document.createElement("div");
   box.className="move-slot";
   box.innerHTML='<div class="move-label">技'+slot+'</div>'+
    '<input id="move'+slot+'Search" class="move-search" type="text" placeholder="技を検索…" autocomplete="off">'+
-   '<div id="move'+slot+'Candidates" class="move-candidates"></div>'+
+   '<div id="move'+slot+'Candidates" class="move-candidates" style="display:none"></div>'+
    '<div id="move'+slot+'Selected" class="move-selected empty">未選択</div>';
   area.appendChild(box);
   const input=box.querySelector("input");
   input.dataset.id=id;
-  input.addEventListener("input",()=>renderMoveSlot(slot));
+  input.addEventListener("focus",()=>renderMoveSlot(slot,true));
+  input.addEventListener("input",()=>renderMoveSlot(slot,true));
  }
- for(let slot=1;slot<=4;slot++)renderMoveSlot(slot);
+ for(let slot=1;slot<=4;slot++)renderMoveSlot(slot,false);
 }
-function renderMoveSlot(slot){
+function renderMoveSlot(slot,show){
  const input=$("move"+slot+"Search"); if(!input)return;
- const id=input.dataset.id, list=MOVESETS[id]||[], q=hira(input.value.trim());
- const saved=(movesSaved[id]&&Array.isArray(movesSaved[id]))?movesSaved[id]:[];
+ const id=input.dataset.id, list=MOVESETS[id]||[];
+ const q=hira(input.value.trim());
+ const saved=Array.isArray(movesSaved[id])?movesSaved[id]:[];
  const selected=saved[slot-1]||"";
- const found=list.filter(v=>!q||hira(v[0]).includes(q)||hira(v[1]).includes(q));
  const c=$("move"+slot+"Candidates");
+ const found=list.filter(v=>!q||hira(v[0]).includes(q)||hira(v[1]).includes(q));
  c.innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'</button>').join("");
- c.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",function(){
-  if(!movesSaved[id]||!Array.isArray(movesSaved[id]))movesSaved[id]=[];
-  movesSaved[id][slot-1]=this.dataset.move;
+ c.style.display=show?"grid":"none";
+ c.querySelectorAll("[data-move]").forEach(b=>b.onclick=()=>{
+  if(!Array.isArray(movesSaved[id]))movesSaved[id]=[];
+  movesSaved[id][slot-1]=b.dataset.move;
   input.value="";
-  renderMoveSlot(slot);
+  c.style.display="none";
+  renderMoveSlot(slot,false);
   input.blur();
- }));
- const selectedEl=$("move"+slot+"Selected");
- selectedEl.className=selected?"move-selected":"move-selected empty";
- selectedEl.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="move-change">変更</button>':'未選択';
- if(selected){
-  selectedEl.querySelector(".move-change").addEventListener("click",function(){
-   input.focus();
-   input.select();
-   renderMoveSlot(slot);
-  });
- }
+ });
+ const out=$("move"+slot+"Selected");
+ out.className=selected?"move-selected":"move-selected empty";
+ out.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="move-change">変更</button>':'未選択';
+ if(selected)out.querySelector(".move-change").onclick=()=>input.focus();
 }
 
 function renderItems(){
- const input=$("itemSearch");
- if(!input)return;
- const id=input.dataset.id;
- const q=hira(input.value.trim());
+ const input=$("itemSearch"); if(!input)return;
+ const id=input.dataset.id, q=hira(input.value.trim());
  const selected=itemsSaved[id]||"";
+ const c=$("itemCandidates");
  const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
- const candidates=$("itemCandidates");
- candidates.innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
- candidates.querySelectorAll("[data-item]").forEach(btn=>btn.addEventListener("click",function(){
-   if($("mega").checked)return;
-   itemsSaved[id]=this.dataset.item;
-   input.value="";
-   input.blur();
-   renderItems();
- }));
- const selectedEl=$("itemSelected");
- if(selectedEl){
-   selectedEl.className=selected?"item-selected":"item-selected empty";
-   selectedEl.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="item-change">変更</button>':'未選択';
-   if(selected)selectedEl.querySelector(".item-change").addEventListener("click",function(){
-     input.focus();
-   });
+ c.innerHTML=found.map(v=>'<button type="button" class="candidate" data-item="'+v+'">'+v+'</button>').join("");
+ c.style.display="none";
+ input.onfocus=()=>{ renderItems(); c.style.display="grid"; };
+ input.oninput=()=>{ renderItems(); c.style.display="grid"; };
+ c.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>{
+  if($("mega").checked)return;
+  itemsSaved[id]=b.dataset.item;
+  input.value="";
+  c.style.display="none";
+  input.blur();
+  renderItems();
+ });
+ const out=$("itemSelected");
+ if(out){
+  out.className=selected?"item-selected":"item-selected empty";
+  out.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="item-change">変更</button>':'未選択';
+  if(selected)out.querySelector(".item-change").onclick=()=>input.focus();
  }
 }
 
