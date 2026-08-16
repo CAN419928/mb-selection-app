@@ -16,6 +16,19 @@ input{width:100%;padding:14px;border:2px solid #d8dee9;border-radius:12px;font-s
 .selected{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.pill{display:flex;align-items:center;gap:7px;background:#edf2ff;border-radius:999px;padding:8px 10px 8px 12px;font-size:14px;font-weight:700}.pill button{border:0;background:transparent;font-size:17px;padding:0;line-height:1}
 .status{margin-top:10px;font-size:13px;color:#667085}.empty{color:#98a2b3;font-size:13px;padding:8px 0}
 </style>
+
+<style id="move-ui-enhancement">
+.move-slot{margin-top:12px}
+.move-slot:first-child{margin-top:0}
+.move-slot .move-label{font-size:13px;font-weight:700;margin-bottom:6px}
+.move-slot .move-search{width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px;box-sizing:border-box}
+.move-slot .move-candidates{display:none;gap:6px;margin-top:7px}
+.move-slot:focus-within .move-candidates{display:grid}
+.move-slot .move-selected{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:10px 12px;border:2px solid #4b8cff;border-radius:10px;background:#eef5ff;color:#174ea6;font-weight:700}
+.move-slot .move-selected.empty{border:1px dashed #c8d0dc;background:#f8fafc;color:#7a8797;font-weight:400}
+.move-slot .move-change{border:0;background:transparent;color:#174ea6;font-size:12px;font-weight:700;padding:2px 4px}
+.move-slot .candidate{padding:9px 10px;border:1px solid #d8dee9;border-radius:9px;background:#fff;text-align:left}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -156,13 +169,15 @@ function renderGarchompMoves(){
  const area=$("movesArea"); if(!area)return;
  area.innerHTML="";
  for(let slot=1;slot<=4;slot++){
-  const box=document.createElement("div"); box.style.marginTop=slot===1?"0":"12px";
-  box.innerHTML='<div style="font-size:13px;font-weight:700;margin-bottom:6px">技'+slot+'</div>'+
-   '<input id="move'+slot+'Search" type="text" placeholder="技を検索…" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d8dee9;border-radius:11px;font-size:16px">'+
-   '<div id="move'+slot+'Candidates" style="display:grid;gap:6px;margin-top:7px"></div>'+
-   '<div id="move'+slot+'Selected" style="font-size:13px;margin-top:7px;color:#536174"></div>';
+  const box=document.createElement("div");
+  box.className="move-slot";
+  box.innerHTML='<div class="move-label">技'+slot+'</div>'+
+   '<input id="move'+slot+'Search" class="move-search" type="text" placeholder="技を検索…" autocomplete="off">'+
+   '<div id="move'+slot+'Candidates" class="move-candidates"></div>'+
+   '<div id="move'+slot+'Selected" class="move-selected empty">未選択</div>';
   area.appendChild(box);
-  const input=box.querySelector("input"); input.dataset.id=id;
+  const input=box.querySelector("input");
+  input.dataset.id=id;
   input.addEventListener("input",()=>renderMoveSlot(slot));
  }
  for(let slot=1;slot<=4;slot++)renderMoveSlot(slot);
@@ -171,15 +186,29 @@ function renderMoveSlot(slot){
  const input=$("move"+slot+"Search"); if(!input)return;
  const id=input.dataset.id, list=MOVESETS[id]||[], q=hira(input.value.trim());
  const saved=(movesSaved[id]&&Array.isArray(movesSaved[id]))?movesSaved[id]:[];
+ const selected=saved[slot-1]||"";
  const found=list.filter(v=>!q||hira(v[0]).includes(q)||hira(v[1]).includes(q));
  const c=$("move"+slot+"Candidates");
  c.innerHTML=found.map(v=>'<button type="button" class="candidate" data-move="'+v[0]+'">'+v[0]+'</button>').join("");
  c.querySelectorAll("[data-move]").forEach(b=>b.addEventListener("click",function(){
   if(!movesSaved[id]||!Array.isArray(movesSaved[id]))movesSaved[id]=[];
-  movesSaved[id][slot-1]=this.dataset.move; input.value=""; renderMoveSlot(slot);
+  movesSaved[id][slot-1]=this.dataset.move;
+  input.value="";
+  renderMoveSlot(slot);
+  input.blur();
  }));
- $("move"+slot+"Selected").textContent=saved[slot-1]?"選択中："+saved[slot-1]:"";
+ const selectedEl=$("move"+slot+"Selected");
+ selectedEl.className=selected?"move-selected":"move-selected empty";
+ selectedEl.innerHTML=selected?'<span>✓ '+selected+'</span><button type="button" class="move-change">変更</button>':'未選択';
+ if(selected){
+  selectedEl.querySelector(".move-change").addEventListener("click",function(){
+   input.focus();
+   input.select();
+   renderMoveSlot(slot);
+  });
+ }
 }
+
 function renderItems(){
  const q=hira($("itemSearch").value.trim());
  const found=ITEMS.filter(v=>!q||hira(v).includes(q)).slice(0,8);
